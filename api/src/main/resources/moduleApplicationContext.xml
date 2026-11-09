@@ -23,7 +23,10 @@
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-    <context:component-scan base-package="org.openmrs.module.cag" />
+    <!-- web.* (REST resources, CagController) belongs to webModuleApplicationContext.xml -->
+    <context:component-scan base-package="org.openmrs.module.cag">
+        <context:exclude-filter type="regex" expression="org\.openmrs\.module\.cag\.web\..*"/>
+    </context:component-scan>
 
     <!-- Wraps CagService methods in DB transactions and OpenMRS interceptors,
     which set audit info like dateCreated, changedBy, etc.-->

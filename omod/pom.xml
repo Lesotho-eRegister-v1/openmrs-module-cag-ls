@@ -30,6 +30,40 @@
 			<classifier>tests</classifier>
 		</dependency>
 
+		<!-- openmrs-test 2.5 needs JUnit >= 4.12 and mockito 3 / powermock 2 (parent pins older ones) -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.12.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>2.0.9</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<version>2.0.9</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- AdminListExtension moved out of core into legacyui in OpenMRS 2.x -->
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>legacyui-omod</artifactId>
+			<version>1.21.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>webservices.rest-omod</artifactId>

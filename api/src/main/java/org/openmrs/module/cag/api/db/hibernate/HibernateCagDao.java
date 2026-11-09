@@ -5,6 +5,7 @@ import org.hibernate.SQLQuery;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
 import org.openmrs.module.cag.api.db.CagDao;
@@ -250,5 +251,23 @@ public class HibernateCagDao implements CagDao {
 		Query query = getSession().createQuery("from Location l where l.uuid=:locationUuid");
 		query.setString("locationUuid", locationUuid);
 		return (Location) query.uniqueResult();
+	}
+	
+	@Override
+	public CagVisit getActiveCagVisitContaining(Visit visit) {
+		Query query = getSession().createQuery(
+		    "select cv from cag_visit cv join cv.visits v where v = :visit and cv.voided = false and cv.isActive = true");
+		query.setParameter("visit", visit);
+		query.setMaxResults(1);
+		return (CagVisit) query.uniqueResult();
+	}
+	
+	@Override
+	public CagEncounter getCagEncounterContaining(Encounter encounter) {
+		Query query = getSession().createQuery(
+		    "select ce from cag_encounter ce join ce.encounters e where e = :encounter and ce.voided = false");
+		query.setParameter("encounter", encounter);
+		query.setMaxResults(1);
+		return (CagEncounter) query.uniqueResult();
 	}
 }

@@ -13,7 +13,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.User;
-import org.simpleframework.xml.Root;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 

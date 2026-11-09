@@ -93,7 +93,7 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 			searchedCag.setCagPatientList(patients);
 		}
 		
-		return this.dao.getCagByPatientUuid(uuid);
+		return searchedCag;
 	}
 	
 	@Override
@@ -149,6 +149,15 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 	public CagVisit openCagVisit(CagVisit cagVisit) {
 		cagVisit.setCreator(Context.getAuthenticatedUser());
 		cagVisit.setIsActive(true);
+		// The REST payload nests each member's REG encounter inside its Visit but never sets
+		// Encounter.visit, which owns encounter.visit_id: without this they are saved with no visit.
+		for (Visit visit : cagVisit.getVisits()) {
+			for (Encounter encounter : visit.getEncounters()) {
+				if (encounter.getVisit() == null) {
+					encounter.setVisit(visit);
+				}
+			}
+		}
 		CagVisit savedCagVisit = dao.saveCagVisit(cagVisit);
 		
 		Map<String, String> absentees = cagVisit.getAbsentees();
@@ -176,7 +185,10 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 		cagEncounter.setCagEncounterDateTime(cagVisit.getDateStarted());
 		
 		for (Visit currentVisit : visits) {
-			cagEncounter.getEncounters().add(currentVisit.getNonVoidedEncounters().get(0));
+			List<Encounter> visitEncounters = currentVisit.getNonVoidedEncounters();
+			if (!visitEncounters.isEmpty()) {
+				cagEncounter.getEncounters().add(visitEncounters.get(0));
+			}
 		}
 		
 		saveCagEncounter(cagEncounter);

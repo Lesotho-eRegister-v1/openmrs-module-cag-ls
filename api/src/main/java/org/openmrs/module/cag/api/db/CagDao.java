@@ -3,6 +3,7 @@ package org.openmrs.module.cag.api.db;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.module.cag.cag.*;
 import org.springframework.stereotype.Repository;
 
@@ -68,4 +69,9 @@ public interface CagDao {
 	
 	Location getLocation(String uuid);
 	
+	/** The active, non-voided CAG visit that has {@code visit} among its member visits, or null. */
+	CagVisit getActiveCagVisitContaining(Visit visit);
+	
+	/** The non-voided CAG encounter that links {@code encounter}, or null. */
+	CagEncounter getCagEncounterContaining(Encounter encounter);
 }
