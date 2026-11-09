@@ -30,6 +30,10 @@ import org.openmrs.module.cag.api.CagService;
 import org.openmrs.module.cag.cag.CagEncounter;
 import org.openmrs.module.cag.cag.CagVisit;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -162,8 +166,7 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 		Encounter source = saveAttenderFollowUp(58);
 		
 		leaf(onlyTemplate(source), DAYS_DISPENSED).setValueNumeric(28.0);
-		Context.getEncounterService().saveEncounter(source);
-		Context.flushSession();
+		saveAndCommit(source);
 		
 		Encounter copy = onlyCopy(6, 102);
 		assertEquals(28.0, leaf(onlyTemplate(copy), DAYS_DISPENSED).getValueNumeric(), 0.0);
@@ -172,16 +175,14 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 		
 		// saving again with nothing changed must not churn obs
 		int before = allObsCount(copy);
-		Context.getEncounterService().saveEncounter(source);
-		Context.flushSession();
+		saveAndCommit(source);
 		assertEquals(before, allObsCount(onlyCopy(6, 102)));
 	}
 	
 	@Test
 	public void memberConsultation_shouldNotPropagate() {
 		Encounter memberOwn = followUp(patient(6), visit(102), CONSULTATION, 30);
-		Context.getEncounterService().saveEncounter(memberOwn);
-		Context.flushSession();
+		saveAndCommit(memberOwn);
 		
 		assertEquals(0, encountersOnVisit(2, 101).size());
 		assertEquals(0, encountersOnVisit(7, 103).size());
@@ -189,8 +190,7 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 	
 	@Test
 	public void otherEncounterTypes_shouldNotPropagate() {
-		Context.getEncounterService().saveEncounter(followUp(patient(2), visit(101), REG, 58));
-		Context.flushSession();
+		saveAndCommit(followUp(patient(2), visit(101), REG, 58));
 		
 		assertEquals(0, encountersOnVisit(6, 102).size());
 	}
@@ -205,12 +205,49 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 		assertEquals(0, encountersOnVisit(6, 102).size());
 	}
 	
+	/**
+	 * Live bug 2026-11-09 20:09: one Bahmni consultation save went through emrapi
+	 * EmrEncounterServiceImpl.save, which switches the session to FlushMode.MANUAL and calls
+	 * saveEncounter several times. Each call created another set of copies (3 per member), which
+	 * then broke Clinical for those members ("More than one encounter matches the criteria").
+	 */
+	@Test
+	public void severalSavesInOneManualFlushSave_likeEmrapi_shouldMapOnce() {
+		Session session = Context.getRegisteredComponent("sessionFactory", SessionFactory.class).getCurrentSession();
+		FlushMode previous = session.getHibernateFlushMode();
+		Encounter source = followUp(patient(2), visit(101), CONSULTATION, 58);
+		session.setHibernateFlushMode(FlushMode.MANUAL);
+		try {
+			Context.getEncounterService().saveEncounter(source);
+			Context.getEncounterService().saveEncounter(source);
+			Context.getEncounterService().saveEncounter(source);
+		}
+		finally {
+			session.setHibernateFlushMode(previous);
+		}
+		commit();
+		
+		onlyCopy(6, 102);
+		onlyCopy(7, 103);
+		assertEquals(1, Context.getService(CagService.class).searchCagEncounters(CAG_UUID).size());
+	}
+	
 	// ---------------------------------------------------------------------------------------------
+	
+	private void saveAndCommit(Encounter encounter) {
+		Context.getEncounterService().saveEncounter(encounter);
+		commit();
+	}
+	
+	/** What Spring does at commit, short of committing (the test transaction is rolled back). */
+	private void commit() {
+		TransactionSynchronizationUtils.triggerBeforeCommit(false);
+		Context.flushSession();
+	}
 	
 	private Encounter saveAttenderFollowUp(double daysDispensed) {
 		Encounter source = followUp(patient(2), visit(101), CONSULTATION, daysDispensed);
-		Context.getEncounterService().saveEncounter(source);
-		Context.flushSession();
+		saveAndCommit(source);
 		return source;
 	}
 	
