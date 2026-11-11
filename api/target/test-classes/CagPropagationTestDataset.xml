@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  Mirrors the live CAG 64feb3c1 on 2026-11-09:
+  - patient 2 = attender (test laboratory), 6 and 7 = present members, 8 = member removed (status 0)
+  - one active cag_visit with a CAG visit per member, started 16:39:35
+  - concept / encounter type uuids are the real eRegister v1 ones used by the
+    "HIV Treatment and Care Progress Template" follow-up form.
+-->
+<dataset>
+	<encounter_type encounter_type_id="100" name="Consultation" description="Consultation" creator="1" date_created="2026-01-01 00:00:00.0" retired="false" uuid="81852aee-3f10-11e4-adec-0800271c1b75"/>
+	<encounter_type encounter_type_id="101" name="REG" description="Registration" creator="1" date_created="2026-01-01 00:00:00.0" retired="false" uuid="81888515-3f10-11e4-adec-0800271c1b75"/>
+	<visit_type visit_type_id="100" name="CAG" description="CAG" creator="1" date_created="2026-01-01 00:00:00.0" retired="false" uuid="da0fffe2-a9c9-489a-b9b0-a5405032c465"/>
+
+	<!-- form / groups (N/A sets) -->
+	<concept concept_id="90001" retired="false" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2026-01-01 00:00:00.0" uuid="746818ac-65a0-4d74-9609-ddb2c330a31b"/>
+	<concept concept_id="90002" retired="false" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2026-01-01 00:00:00.0" uuid="6fba4db0-4be0-48ab-b70f-68249959fbf2"/>
+	<!-- questions -->
+	<concept concept_id="90010" retired="false" datatype_id="1" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="27d55083-5e66-4b5a-91d3-2c9a42cc9996"/>
+	<concept_numeric concept_id="90010" low_absolute="0.0" units="days" allow_decimal="false"/>
+	<concept concept_id="90011" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="9eb00622-1078-4f7b-aa69-61e6c36db347"/>
+	<concept concept_id="90012" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="13382e01-9f18-488b-b2d2-58ab54c82d82"/>
+	<concept concept_id="90013" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="ed064424-0331-47f6-9532-77156f40a014"/>
+	<concept concept_id="90014" retired="false" datatype_id="6" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="88489023-783b-4021-b7a9-05ca9877bf67"/>
+	<concept concept_id="90015" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="e0bc761d-ac3b-4033-92c7-476304b9c5e8"/>
+	<concept concept_id="90016" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="e8d05f4a-9c3f-4f99-941c-596f238f095f"/>
+	<concept concept_id="90017" retired="false" datatype_id="2" class_id="7" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="0bb627e4-6ac6-4d9e-b540-7f2e21da0127"/>
+	<!-- answers -->
+	<concept concept_id="90030" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="0f880c52-3ced-43ac-a79b-07a2740ae428"/>
+	<concept concept_id="90031" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000031"/>
+	<concept concept_id="90032" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000032"/>
+	<concept concept_id="90033" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000033"/>
+	<concept concept_id="90034" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000034"/>
+	<concept concept_id="90035" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000035"/>
+	<concept concept_id="90036" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000036"/>
+	<concept concept_id="90037" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2026-01-01 00:00:00.0" uuid="c0000000-0000-4000-8000-000000000037"/>
+
+	<concept_name concept_name_id="90001" concept_id="90001" name="HIV Treatment and Care Progress Template" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090001"/>
+	<concept_name concept_name_id="90002" concept_id="90002" name="Regimen" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090002"/>
+	<concept_name concept_name_id="90010" concept_id="90010" name="ARV drugs No. of days dispensed" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090010"/>
+	<concept_name concept_name_id="90011" concept_id="90011" name="HIVTC, ARV drugs supply duration" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090011"/>
+	<concept_name concept_name_id="90012" concept_id="90012" name="HIVTC, ART Regimen" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090012"/>
+	<concept_name concept_name_id="90013" concept_id="90013" name="Appointment scheduled" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090013"/>
+	<concept_name concept_name_id="90014" concept_id="90014" name="ART, Follow-up date" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090014"/>
+	<concept_name concept_name_id="90015" concept_id="90015" name="Type of client" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090015"/>
+	<concept_name concept_name_id="90016" concept_id="90016" name="Cotrimoxazole adherence" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090016"/>
+	<concept_name concept_name_id="90017" concept_id="90017" name="Functional Status" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090017"/>
+	<concept_name concept_name_id="90030" concept_id="90030" name="Treatment Buddy" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090030"/>
+	<concept_name concept_name_id="90031" concept_id="90031" name="ART patient" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090031"/>
+	<concept_name concept_name_id="90032" concept_id="90032" name="HIVTC, Two months supply" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090032"/>
+	<concept_name concept_name_id="90033" concept_id="90033" name="Yes" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090033"/>
+	<concept_name concept_name_id="90034" concept_id="90034" name="Not Applicable" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090034"/>
+	<concept_name concept_name_id="90035" concept_id="90035" name="Work" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090035"/>
+	<concept_name concept_name_id="90036" concept_id="90036" name="1j=TDF-3TC-DTG" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090036"/>
+	<concept_name concept_name_id="90037" concept_id="90037" name="1f=TDF-3TC-EFV" locale="en" locale_preferred="1" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2026-01-01 00:00:00.0" voided="false" uuid="d0000000-0000-4000-8000-000000090037"/>
+
+	<!-- member 6 has an earlier regimen of their own (1f); member 7 has none -->
+	<encounter encounter_id="900" encounter_type="100" patient_id="6" location_id="1" encounter_datetime="2026-09-01 10:00:00.0" creator="1" date_created="2026-09-01 10:00:00.0" voided="false" uuid="e0000000-0000-4000-8000-000000000900"/>
+	<obs obs_id="900" person_id="6" status="FINAL" concept_id="90012" encounter_id="900" obs_datetime="2026-09-01 10:00:00.0" location_id="1" value_coded="90037" creator="1" date_created="2026-09-01 10:00:00.0" voided="false" uuid="f0000000-0000-4000-8000-000000000900"/>
+
+	<!-- CAG and its members -->
+	<cag cag_id="1" name="Test CAG" description="Test CAG" creator="1" date_created="2026-11-09 18:39:21.0" voided="false" uuid="64feb3c1-601e-4ebb-9b55-265939125843"/>
+	<cag_patient cag_patient_id="1" cag_id="1" patient_id="2" status="true" uuid="da7f524f-27ce-4bb2-86d6-6d1d05312bd5"/>
+	<cag_patient cag_patient_id="2" cag_id="1" patient_id="6" status="true" uuid="a7e04421-525f-442f-8138-05b619d16def"/>
+	<cag_patient cag_patient_id="3" cag_id="1" patient_id="7" status="true" uuid="5946f880-b197-400b-9caa-a3c661d23041"/>
+	<cag_patient cag_patient_id="4" cag_id="1" patient_id="8" status="false" uuid="8adf539e-4b5a-47aa-80c0-ba1025c957fa"/>
+
+	<visit visit_id="101" patient_id="2" visit_type_id="100" date_started="2026-11-09 16:39:35.0" location_id="1" creator="1" date_created="2026-11-09 18:39:35.0" voided="0" uuid="b882df20-c2a0-4457-a426-a3fd2259efe3"/>
+	<visit visit_id="102" patient_id="6" visit_type_id="100" date_started="2026-11-09 16:39:35.0" location_id="1" creator="1" date_created="2026-11-09 18:39:35.0" voided="0" uuid="28551d9f-761d-4989-b8d4-12ff43113df3"/>
+	<visit visit_id="103" patient_id="7" visit_type_id="100" date_started="2026-11-09 16:39:35.0" location_id="1" creator="1" date_created="2026-11-09 18:39:35.0" voided="0" uuid="aca0ccf6-fc12-4a3a-a3fe-355aa31d3ffd"/>
+	<visit visit_id="104" patient_id="8" visit_type_id="100" date_started="2026-11-09 16:39:35.0" location_id="1" creator="1" date_created="2026-11-09 18:39:35.0" voided="0" uuid="v0000000-0000-4000-8000-000000000104"/>
+
+	<cag_visit cag_visit_id="1" cag_id="1" patient_id="2" date_started="2026-11-09 16:39:35.0" active="true" location="Unknown Location" creator="1" date_created="2026-11-09 18:39:35.0" voided="false" uuid="c616721e-ede2-4e79-8c7d-cac3745fb033"/>
+	<cag_visit_visit cag_visit_id="1" visit_id="101"/>
+	<cag_visit_visit cag_visit_id="1" visit_id="102"/>
+	<cag_visit_visit cag_visit_id="1" visit_id="103"/>
+	<cag_visit_visit cag_visit_id="1" visit_id="104"/>
+</dataset>

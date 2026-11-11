@@ -1,6 +1,6 @@
 # CAG member data propagation: investigation
 
-Status: **Phases 1-3 done; Phase 4 fix built and tested on branch `fix/cag-member-data-propagation`, not deployed.** Post-deploy verification (Phase 4.4) pending.
+Status: **Fix built on branch `fix/cag-member-data-propagation`, but the running server has the old May 7 module (see §10, re-checked 2026-11-11).** Post-deploy verification (Phase 4.4) pending.
 
 Bug: clinical data captured for one CAG member is not copied to the other members of CAG `64feb3c1-601e-4ebb-9b55-265939125843` (test patient "Test Laboratory").
 
@@ -266,12 +266,14 @@ sequenceDiagram
 cd /home/kgatman/bahmniDev/openmrs-module-cag && mvn clean install
 # back up OUTSIDE the modules folder, or OpenMRS loads both copies
 cp /var/lib/v1/openmrs-v1-modules/cag-1.0.3-SNAPSHOT.omod ~/cag-1.0.3-SNAPSHOT.omod.bak-2026-11-09
-cp omod/target/cag-1.0.3-SNAPSHOT.omod /var/lib/v1/openmrs-v1-modules/
+# remove the old file: two cag versions in the folder would both try to load
+rm /var/lib/v1/openmrs-v1-modules/cag-1.0.3-SNAPSHOT.omod
+cp omod/target/cag-1.0.4-SNAPSHOT.omod /var/lib/v1/openmrs-v1-modules/
 cd /var/lib/v1/bahmni-docker-ls/bahmni-standard
 docker compose --env-file .env --env-file .env.secrets restart openmrs
 docker logs -f bahmni-standard-openmrs-1 2>&1 | grep -iE 'cag|Started Cag|Exception'
 ```
-Rollback: copy the `.bak` file back over it and restart `openmrs` again. No schema changes, so rollback is clean; the `cag.propagation.*` global properties stay but are unused.
+Rollback: delete `cag-1.0.4-SNAPSHOT.omod`, copy the `.bak` file back as `cag-1.0.3-SNAPSHOT.omod`, and restart `openmrs` again. No schema changes, so rollback is clean; the `cag.propagation.*` global properties stay but are unused.
 
 ## 9. Remaining risks / follow-ups
 - **Not verified on the live server yet.** Assumes Bahmni's consultation save goes through the advised `EncounterService` proxy (it does in emrapi/bahmnicore, but verify after deploy).
@@ -279,6 +281,15 @@ Rollback: copy the `.bak` file back over it and restart `openmrs` again. No sche
 - **Existing bad data:** fabricated obs 549930-549934 on encounter 36011 (test laboratory) and the same pattern for any earlier attender; the three REG encounters with `visit_id NULL`. Cleanup needs your decision.
 - Members with **two open visits** (test moliehi: 20311 + 20316): the copy goes to the CAG visit, but Clinical may show the other visit as "active".
 - Copies are created only for members present at group-visit start (those with a visit in `cag_visit_visit`). Absentees get nothing, matching the old behaviour.
-- Same module version string (`1.0.3-SNAPSHOT`) as the deployed one. Consider bumping to `1.0.4` so the deployed version is identifiable.
+- Version bumped to `1.0.4-SNAPSHOT` (author `MoH-Lesotho`), so the new build is distinguishable from the deployed `1.0.3-SNAPSHOT`.
 - The `target/` folder is committed in this repo; the branch commits only sources.
+
+## 10. Phase 1 re-check (2026-11-11, read-only)
+§1-§3 still describe the code on `main` and the deployed module correctly. New or changed:
+
+1. **The fix is not running.** `/var/lib/v1/openmrs-v1-modules/cag-1.0.3-SNAPSHOT.omod` (45,850 bytes, md5 `b360c084…`, written by root 2026-11-10 13:50) is the May 7 build: `require_version` 1.11.6, `<advice>` still commented out, no `advice` or `propagation` classes. The branch build is `omod/target/cag-1.0.3-SNAPSHOT.omod` (61,208 bytes, md5 `d7b3a6b7…`).
+2. **Deploying by copying the file does not last.** The modules folder is a git checkout whose tracked blob is that May 7 build (commit `2eb7275`). The file's root ownership and timestamp match other repos reset at 13:50 on Nov 10, so an installer or catch-up run most likely restored it (inferred, not proven). `eregister-autopull` skips a dirty checkout, but a reset would restore the old module. The new `.omod` has to be committed to `openmrs-v1-modules`.
+3. **Possible gap in the fix: form shape.** `CagEncounterPropagator` needs a top-level obs of concept `746818ac…` (HIV Treatment and Care Progress Template). The Form Builder form `HIV Treatment and Care Follow Up 2026` v3 does not contain that concept: "Type of client" is a top-level obs and the other mapped questions sit in a top-level `Regimen` group. A save from that form makes `findTopLevel` return null, so nothing is copied and nothing is logged. The tests only build the Template-wrapped shape. Which shape real consultations use must be confirmed from the `obs` table in Phase 2.
+4. **Scope.** The branch copies 4 answers, sets client type and fills the member's own regimen. It does not copy drug orders, other obs or other encounter types. The 0.92 code also had orders commented out (`consultationController.js:1027`, `:1214`).
+5. Ruled out: emrapi's `FlushMode.MANUAL` losing the copies. `EmrEncounterServiceImpl.save` restores the previous flush mode before returning, so the `beforeCommit` work is flushed at commit.
 

@@ -1,6 +1,6 @@
 org/openmrs/module/cag/web/resource/CagVisitResource.class
-org/openmrs/module/cag/web/resource/CagEncounterResource.class
 org/openmrs/module/cag/web/resource/CagPatientResource.class
+org/openmrs/module/cag/web/resource/CagEncounterResource.class
 org/openmrs/module/cag/web/resource/CagResource.class
 org/openmrs/module/cag/web/controller/CagController.class
 org/openmrs/module/cag/extension/html/AdminList.class

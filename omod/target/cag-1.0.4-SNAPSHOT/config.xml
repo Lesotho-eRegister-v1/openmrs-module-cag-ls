@@ -5,9 +5,9 @@
 	<!-- Base Module Properties -->
 	<id>cag</id>
 	<name>Community ART Groups Module</name>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<package>org.openmrs.module.cag</package>
-	<author>ICAP</author>
+	<author>MoH-Lesotho</author>
 	<description>
 		Manages patients' Community ART Groups data
 	</description>
@@ -17,7 +17,7 @@
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/cag/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 
-	<require_version>1.11.6</require_version>
+	<require_version>2.5.0</require_version>
 
 	<!-- Extensions -->
 	<extension>
@@ -51,12 +51,55 @@
 
 
 
-	<!-- AOP
+	<!-- AOP -->
+	<!-- Maps the CAG attender's follow-up form onto the other present members' CAG visits
+	     (replaces the browser-side POST cagEncounter of the Bahmni 0.92 Clinical app). -->
 	<advice>
-		<point>org.openmrs.api.FormService</point>
-		<class>org.openmrs.module.cag.advice.DuplicateFormAdvisor</class>
+		<point>org.openmrs.api.EncounterService</point>
+		<class>org.openmrs.module.cag.advice.CagEncounterSaveAdvice</class>
 	</advice>
-	 /AOP -->
+	<!-- /AOP -->
+
+	<globalProperty>
+		<property>cag.propagation.enabled</property>
+		<defaultValue>true</defaultValue>
+		<description>Map the CAG attender's follow-up form onto the other present members' CAG visits.</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.encounterTypeUuids</property>
+		<defaultValue>81852aee-3f10-11e4-adec-0800271c1b75</defaultValue>
+		<description>Comma-separated encounter type uuids whose saves are mapped (default: Consultation).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.formConceptUuid</property>
+		<defaultValue>746818ac-65a0-4d74-9609-ddb2c330a31b</defaultValue>
+		<description>Top-level obs (form) that is mapped (default: HIV Treatment and Care Progress Template).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.copiedConceptUuids</property>
+		<defaultValue>27d55083-5e66-4b5a-91d3-2c9a42cc9996,9eb00622-1078-4f7b-aa69-61e6c36db347,ed064424-0331-47f6-9532-77156f40a014,88489023-783b-4021-b7a9-05ca9877bf67</defaultValue>
+		<description>Comma-separated questions whose answers are copied from the attender as-is (default: ARV drugs No. of days dispensed, HIVTC ARV drugs supply duration, Appointment scheduled, ART Follow-up date).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.ownRegimenConceptUuid</property>
+		<defaultValue>13382e01-9f18-488b-b2d2-58ab54c82d82</defaultValue>
+		<description>Question answered with each member's own latest value instead of the attender's (default: HIVTC, ART Regimen).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.clientTypeConceptUuid</property>
+		<defaultValue>e0bc761d-ac3b-4033-92c7-476304b9c5e8</defaultValue>
+		<description>Question set to the buddy answer on members' copies (default: Type of client).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.clientTypeBuddyAnswerUuid</property>
+		<defaultValue>0f880c52-3ced-43ac-a79b-07a2740ae428</defaultValue>
+		<description>Answer used for members' client type (default: Treatment Buddy).</description>
+	</globalProperty>
+	<globalProperty>
+		<property>cag.propagation.followUpDateConceptUuid</property>
+		<defaultValue>88489023-783b-4021-b7a9-05ca9877bf67</defaultValue>
+		<description>Question whose date is stored as cag_encounter.next_encounter_date (default: ART, Follow-up date).</description>
+	</globalProperty>
 
 
 	<!-- Required Privileges

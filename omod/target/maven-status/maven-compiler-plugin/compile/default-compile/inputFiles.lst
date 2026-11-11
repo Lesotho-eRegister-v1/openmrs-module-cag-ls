@@ -1,6 +1,6 @@
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/extension/html/AdminList.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/controller/CagController.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagEncounterResource.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagPatientResource.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagResource.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagVisitResource.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/extension/html/AdminList.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/controller/CagController.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagEncounterResource.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagPatientResource.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagResource.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagVisitResource.java
