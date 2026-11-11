@@ -23,6 +23,14 @@ public final class CagConstants {
 	public static final String DEFAULT_FORM_CONCEPT_UUID = "746818ac-65a0-4d74-9609-ddb2c330a31b";
 	
 	/**
+	 * Comma-separated Form Builder form names (without version) whose top-level obs are mapped like
+	 * the template above. Matches every published version of the form.
+	 */
+	public static final String GP_FORM_NAMES = "cag.propagation.formNames";
+	
+	public static final String DEFAULT_FORM_NAMES = "HIV Treatment and Care Follow Up 2026";
+	
+	/**
 	 * Comma-separated question concepts whose answers are copied from the attender as-is. Default:
 	 * ARV drugs No. of days dispensed, HIVTC ARV drugs supply duration, Appointment scheduled, ART
 	 * Follow-up date.

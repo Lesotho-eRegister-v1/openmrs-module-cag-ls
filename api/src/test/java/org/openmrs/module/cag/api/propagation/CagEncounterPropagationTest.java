@@ -232,6 +232,44 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 		assertEquals(1, Context.getService(CagService.class).searchCagEncounters(CAG_UUID).size());
 	}
 	
+	/**
+	 * Live bug 2026-11-11 10:59 (encounter 35992): the Form Builder form "HIV Treatment and Care
+	 * Follow Up 2026" has no Template wrapper. Its top-level obs are Regimen -> (...), Vital Signs,
+	 * Type of client, each with form path "Bahmni^HIV Treatment and Care Follow Up 2026.1/...".
+	 */
+	@Test
+	public void formBuilder2026Form_shouldBeMappedOntoEachPresentMembersCagVisit() {
+		Encounter source = followUp2026(patient(2), visit(101), 58);
+		saveAndCommit(source);
+		
+		Encounter member6 = onlyCopy(6, 102);
+		Encounter member7 = onlyCopy(7, 103);
+		for (Encounter copy : new Encounter[] { member6, member7 }) {
+			Obs regimen = topLevel(copy, REGIMEN_GROUP);
+			assertEquals(FORM_2026 + "/211-0", regimen.getFormFieldPath());
+			assertEquals(58.0, leaf(regimen, DAYS_DISPENSED).getValueNumeric(), 0.0);
+			assertEquals(TWO_MONTHS, leaf(regimen, SUPPLY_DURATION).getValueCoded().getUuid());
+			assertEquals(YES, leaf(regimen, APPOINTMENT_SCHEDULED).getValueCoded().getUuid());
+			assertEquals(followUpDate, leaf(regimen, FOLLOW_UP_DATE).getValueDatetime());
+			assertNull(leaf(regimen, COTRIMOXAZOLE));
+			assertEquals(TREATMENT_BUDDY, topLevel(copy, TYPE_OF_CLIENT).getValueCoded().getUuid());
+			assertNull("attender-specific answers not copied", topLevel(copy, FUNCTIONAL_STATUS));
+		}
+		assertEquals(REGIMEN_1F, leaf(topLevel(member6, REGIMEN_GROUP), ART_REGIMEN).getValueCoded().getUuid());
+		assertNull(leaf(topLevel(member7, REGIMEN_GROUP), ART_REGIMEN));
+		assertEquals(ART_PATIENT, topLevel(source, TYPE_OF_CLIENT).getValueCoded().getUuid());
+		
+		List<CagEncounter> cagEncounters = Context.getService(CagService.class).searchCagEncounters(CAG_UUID);
+		assertEquals(1, cagEncounters.size());
+		assertEquals(3, cagEncounters.get(0).getEncounters().size());
+		assertEquals(followUpDate, cagEncounters.get(0).getNextEncounterDate());
+		
+		// re-saving unchanged must not churn obs
+		int before = allObsCount(member6);
+		saveAndCommit(source);
+		assertEquals(before, allObsCount(onlyCopy(6, 102)));
+	}
+	
 	// ---------------------------------------------------------------------------------------------
 	
 	private void saveAndCommit(Encounter encounter) {
@@ -330,6 +368,41 @@ public class CagEncounterPropagationTest extends BaseModuleContextSensitiveTest 
 		List<Encounter> copies = encountersOnVisit(patientId, visitId);
 		assertEquals("encounters for patient " + patientId + " on CAG visit", 1, copies.size());
 		return copies.get(0);
+	}
+	
+	private static final String FORM_2026 = "HIV Treatment and Care Follow Up 2026.1";
+	
+	/** Same shape as encounter 35992 saved live from the 2026 Form Builder form. */
+	private Encounter followUp2026(Patient patient, Visit visit, double daysDispensed) {
+		Encounter e = followUp(patient, visit, CONSULTATION, daysDispensed);
+		Obs template = onlyTemplate(e);
+		e.removeObs(template);
+		for (Obs member : new ArrayList<Obs>(template.getGroupMembers())) {
+			template.removeGroupMember(member);
+			onForm(member, 211);
+			e.addObs(member);
+		}
+		return e;
+	}
+	
+	private static void onForm(Obs obs, int field) {
+		obs.setFormField("Bahmni", FORM_2026 + "/" + field + "-0");
+		if (obs.getGroupMembers() != null) {
+			for (Obs member : obs.getGroupMembers()) {
+				onForm(member, ++field);
+			}
+		}
+	}
+	
+	private Obs topLevel(Encounter e, String conceptUuid) {
+		Obs found = null;
+		for (Obs o : e.getObsAtTopLevel(false)) {
+			if (conceptUuid.equals(o.getConcept().getUuid())) {
+				assertNull("one " + conceptUuid + " at top level", found);
+				found = o;
+			}
+		}
+		return found;
 	}
 	
 	private Obs onlyTemplate(Encounter e) {

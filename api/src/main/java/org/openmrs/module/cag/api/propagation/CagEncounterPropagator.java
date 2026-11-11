@@ -103,10 +103,13 @@ public class CagEncounterPropagator {
 			return Collections.emptyList();
 		}
 		
-		Obs template = findTopLevel(source, settings.formConceptUuid);
+		List<Obs> template = formRoots(source, settings);
 		CagEncounter cagEncounter = dao.getCagEncounterContaining(source);
 		
-		if (template == null) {
+		if (template.isEmpty()) {
+			log.info("Attender encounter " + source.getUuid() + " on CAG visit " + cagVisit.getUuid()
+			        + " has no CAG follow-up form (concept " + settings.formConceptUuid + " or forms " + settings.formNames
+			        + "); nothing propagated");
 			// form removed from the attender's encounter: remove it from the copies too
 			if (cagEncounter != null) {
 				for (Encounter copy : copiesIn(cagEncounter, source)) {
@@ -155,8 +158,8 @@ public class CagEncounterPropagator {
 				continue;
 			}
 			
-			Obs memberForm = mapForm(template, member, settings, buddyAnswer);
-			if (memberForm == null) {
+			List<Obs> memberForm = mapForm(template, member, settings, buddyAnswer);
+			if (memberForm.isEmpty()) {
 				log.warn("CAG follow-up of encounter " + source.getUuid() + " has nothing to copy for patient "
 				        + member.getUuid());
 				continue;
@@ -174,15 +177,16 @@ public class CagEncounterPropagator {
 					copy.addProvider(provider.getEncounterRole(), provider.getProvider());
 				}
 			} else {
-				List<Obs> current = topLevel(copy, settings.formConceptUuid);
-				if (current.size() == 1 && signature(current.get(0)).equals(signature(memberForm))) {
+				if (signature(formRoots(copy, settings)).equals(signature(memberForm))) {
 					result.add(copy);
 					continue;
 				}
 				voidForms(copy, settings);
 				copy.setLocation(source.getLocation());
 			}
-			copy.addObs(memberForm);
+			for (Obs obs : memberForm) {
+				copy.addObs(obs);
+			}
 			Context.getEncounterService().saveEncounter(copy);
 			cagEncounter.getEncounters().add(copy);
 			result.add(copy);
@@ -195,15 +199,26 @@ public class CagEncounterPropagator {
 	}
 	
 	/**
-	 * Copies {@code template} keeping only shared answers, inside the same groups, with the
-	 * member's own regimen and the buddy client type. Groups left with no answers are dropped;
-	 * returns null if nothing is left.
+	 * Copies the form's top-level obs keeping only shared answers, inside the same groups, with the
+	 * member's own regimen and the buddy client type. Works for the legacy observation template
+	 * (one wrapper obs) and for Form Builder forms (several top-level obs). Groups left with no
+	 * answers are dropped; returns an empty list if nothing is left.
 	 */
-	private Obs mapForm(Obs template, Patient member, Settings settings, Concept buddyAnswer) {
+	private List<Obs> mapForm(List<Obs> template, Patient member, Settings settings, Concept buddyAnswer) {
 		boolean[] clientTypePlaced = { false };
-		Obs form = mapObs(template, member, settings, buddyAnswer, clientTypePlaced);
-		if (form == null) {
-			form = newObsLike(template);
+		List<Obs> form = new ArrayList<Obs>();
+		Obs legacyWrapper = null;
+		for (Obs root : template) {
+			Obs mapped = mapObs(root, member, settings, buddyAnswer, clientTypePlaced);
+			if (mapped == null && settings.formConceptUuid.equals(root.getConcept().getUuid())) {
+				mapped = newObsLike(root);
+			}
+			if (mapped != null) {
+				form.add(mapped);
+				if (settings.formConceptUuid.equals(mapped.getConcept().getUuid())) {
+					legacyWrapper = mapped;
+				}
+			}
 		}
 		if (!clientTypePlaced[0] && buddyAnswer != null) {
 			Concept clientType = concept(settings.clientTypeConceptUuid);
@@ -211,10 +226,20 @@ public class CagEncounterPropagator {
 				Obs type = new Obs();
 				type.setConcept(clientType);
 				type.setValueCoded(buddyAnswer);
-				form.addGroupMember(type);
+				if (legacyWrapper != null) {
+					legacyWrapper.addGroupMember(type);
+				} else {
+					form.add(type);
+				}
 			}
 		}
-		return form.hasGroupMembers(false) ? form : null;
+		List<Obs> result = new ArrayList<Obs>();
+		for (Obs obs : form) {
+			if (obs != legacyWrapper || obs.hasGroupMembers(false)) {
+				result.add(obs);
+			}
+		}
+		return result;
 	}
 	
 	private Obs mapObs(Obs source, Patient member, Settings settings, Concept buddyAnswer, boolean[] clientTypePlaced) {
@@ -307,26 +332,51 @@ public class CagEncounterPropagator {
 	}
 	
 	private static boolean voidForms(Encounter encounter, Settings settings) {
-		List<Obs> forms = topLevel(encounter, settings.formConceptUuid);
+		List<Obs> forms = formRoots(encounter, settings);
 		for (Obs form : forms) {
 			Context.getObsService().voidObs(form, VOID_REASON);
 		}
 		return !forms.isEmpty();
 	}
 	
-	private static Obs findTopLevel(Encounter encounter, String conceptUuid) {
-		List<Obs> found = topLevel(encounter, conceptUuid);
-		return found.isEmpty() ? null : found.get(0);
-	}
-	
-	private static List<Obs> topLevel(Encounter encounter, String conceptUuid) {
+	/**
+	 * Top-level obs of the CAG follow-up form: the legacy template obs, or any obs a Form Builder
+	 * form in {@code cag.propagation.formNames} saved (form path "Bahmni^<name>.<version>/...").
+	 */
+	static List<Obs> formRoots(Encounter encounter, Settings settings) {
 		List<Obs> found = new ArrayList<Obs>();
 		for (Obs obs : encounter.getObsAtTopLevel(false)) {
-			if (conceptUuid.equals(obs.getConcept().getUuid())) {
+			if (settings.formConceptUuid.equals(obs.getConcept().getUuid()) || isOnForm(obs, settings.formNames)) {
 				found.add(obs);
 			}
 		}
 		return found;
+	}
+	
+	private static boolean isOnForm(Obs obs, Set<String> formNames) {
+		String path = obs.getFormFieldPath();
+		if (!"Bahmni".equals(obs.getFormFieldNamespace()) || path == null) {
+			return false;
+		}
+		for (String name : formNames) {
+			if (path.startsWith(name + ".")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static Obs findLeaf(List<Obs> roots, String conceptUuid) {
+		for (Obs root : roots) {
+			if (conceptUuid.equals(root.getConcept().getUuid())) {
+				return root;
+			}
+			Obs nested = findLeaf(root, conceptUuid);
+			if (nested != null) {
+				return nested;
+			}
+		}
+		return null;
 	}
 	
 	private static Obs findLeaf(Obs group, String conceptUuid) {
@@ -343,6 +393,15 @@ public class CagEncounterPropagator {
 	}
 	
 	/** Order-independent description of a form's answers, to skip rewriting unchanged copies. */
+	static String signature(List<Obs> roots) {
+		List<String> parts = new ArrayList<String>();
+		for (Obs obs : roots) {
+			parts.add(signature(obs));
+		}
+		Collections.sort(parts);
+		return parts.toString();
+	}
+	
 	static String signature(Obs obs) {
 		StringBuilder sb = new StringBuilder(obs.getConcept().getUuid()).append('=');
 		if (obs.getValueCoded() != null) {
@@ -390,6 +449,8 @@ public class CagEncounterPropagator {
 		
 		String formConceptUuid;
 		
+		Set<String> formNames;
+		
 		Set<String> copiedConceptUuids;
 		
 		String ownRegimenConceptUuid;
@@ -405,6 +466,7 @@ public class CagEncounterPropagator {
 			s.enabled = !"false".equalsIgnoreCase(gp(CagConstants.GP_PROPAGATION_ENABLED, "true"));
 			s.encounterTypeUuids = list(gp(CagConstants.GP_ENCOUNTER_TYPE_UUIDS, CagConstants.DEFAULT_ENCOUNTER_TYPE_UUIDS));
 			s.formConceptUuid = gp(CagConstants.GP_FORM_CONCEPT_UUID, CagConstants.DEFAULT_FORM_CONCEPT_UUID);
+			s.formNames = list(gp(CagConstants.GP_FORM_NAMES, CagConstants.DEFAULT_FORM_NAMES));
 			s.copiedConceptUuids = list(gp(CagConstants.GP_COPIED_CONCEPT_UUIDS, CagConstants.DEFAULT_COPIED_CONCEPT_UUIDS));
 			s.ownRegimenConceptUuid = gp(CagConstants.GP_OWN_REGIMEN_CONCEPT_UUID,
 			    CagConstants.DEFAULT_OWN_REGIMEN_CONCEPT_UUID);
