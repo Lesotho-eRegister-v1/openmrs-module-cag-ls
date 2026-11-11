@@ -8,6 +8,7 @@ import org.openmrs.module.cag.cag.CagVisit;
 import org.openmrs.module.cag.web.controller.CagController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
@@ -18,6 +19,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.Updatable;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
@@ -34,12 +36,16 @@ import java.util.List;
 @Component
 public class CagResource extends DelegatingCrudResource<Cag> implements Updatable {
 	
+	/** Returns null for an unknown uuid, which the REST framework turns into a 404. */
 	@Override
 	public Cag getByUniqueId(String uuid) {
 		Cag cag = getService().getCagByUuid(uuid);
+		if (cag == null) {
+			return null;
+		}
 		List<Patient> cagPatientList = getService().getCagAllPatients(cag.getId());
 		cag.setCagPatientList(cagPatientList);
-		
+
 		return cag;
 	}
 	
@@ -66,20 +72,37 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 		getService().deleteCag(cag.getUuid());
 	}
 	
+	/**
+	 * Updates only the fields present in the request; the others keep their stored value. Returns
+	 * the REST representation, not the entity: returning the Hibernate entity made Jackson
+	 * serialize its whole object graph (creator, patients, ...) and the request failed with a 500
+	 * after the update had already been saved.
+	 */
 	@Override
 	public Object update(String uuid, SimpleObject propertiesToUpdate, RequestContext context) throws ResponseException {
-		System.out.println("update has been called!!!!!!!!!!!");
-		
+		Cag existing = getService().getCagByUuid(uuid);
+		if (existing == null) {
+			throw new ObjectNotFoundException();
+		}
+
 		Cag updatingCag = new Cag();
 		updatingCag.setUuid(uuid);
-		updatingCag.setCreator(Context.getAuthenticatedUser());
-		updatingCag.setName(propertiesToUpdate.get("name").toString());
-		updatingCag.setDescription(propertiesToUpdate.get("description").toString());
-		updatingCag.setConstituency(propertiesToUpdate.get("constituency").toString());
-		updatingCag.setVillage(propertiesToUpdate.get("village").toString());
-		updatingCag.setDistrict(propertiesToUpdate.get("district").toString());
-		
-		return getService().updateCag(updatingCag);
+		updatingCag.setName(value(propertiesToUpdate, "name", existing.getName()));
+		updatingCag.setDescription(value(propertiesToUpdate, "description", existing.getDescription()));
+		updatingCag.setConstituency(value(propertiesToUpdate, "constituency", existing.getConstituency()));
+		updatingCag.setVillage(value(propertiesToUpdate, "village", existing.getVillage()));
+		updatingCag.setDistrict(value(propertiesToUpdate, "district", existing.getDistrict()));
+
+		Cag updated = getService().updateCag(updatingCag);
+		return ConversionUtil.convertToRepresentation(updated, context.getRepresentation());
+	}
+
+	private static String value(SimpleObject properties, String name, String current) {
+		if (!properties.containsKey(name)) {
+			return current;
+		}
+		Object value = properties.get(name);
+		return value == null ? null : value.toString();
 	}
 	
 	@Override
@@ -159,12 +182,12 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
 		String patientUuid = context.getParameter("patientuuid");
-		
-		System.out.println("uuid : " + patientUuid);
-		
+
 		Cag searchedCag = getService().searchCagByMemberUuid(patientUuid);
-		
-		return new NeedsPaging<Cag>(new ArrayList<Cag>(Collections.singletonList(searchedCag)), context);
+		// a patient in no CAG gives an empty result, not a list holding null (500 on conversion)
+		List<Cag> results = searchedCag == null ? new ArrayList<Cag>() : new ArrayList<Cag>(
+		        Collections.singletonList(searchedCag));
+		return new NeedsPaging<Cag>(results, context);
 	}
 	
 	private CagService getService() {

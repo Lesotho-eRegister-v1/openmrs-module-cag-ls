@@ -38,6 +38,9 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 	@Override
 	public Cag getCagByUuid(String uuid) {
 		Cag cag = dao.getCagByUuid(uuid);
+		if (cag == null) {
+			return null;
+		}
 		List<Patient> cagPatientList = getCagAllPatients(cag.getId());
 		cag.setCagPatientList(cagPatientList);
 		return cag;
@@ -135,6 +138,9 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 		cag.setChangedBy(Context.getAuthenticatedUser());
 		
 		Cag updatedCag = dao.updateCag(cag);
+		if (updatedCag == null) {
+			return null;
+		}
 		updatedCag.setCagPatientList(getCagAllPatients(updatedCag.getId()));
 		
 		return updatedCag;
@@ -198,6 +204,9 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 	@Override
 	public CagVisit getCagVisitByUuid(String uuid) {
 		CagVisit retrievedCagVisit = dao.getCagVisitByUuid(uuid);
+		if (retrievedCagVisit == null) {
+			return null;
+		}
 		Map<String, String> absentees = getAbsentees(retrievedCagVisit);
 		retrievedCagVisit.setAbsentees(absentees);
 		
@@ -235,29 +244,31 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 	}
 	
 	@Override
+	/**
+	 * @return the closed CAG visit, or null if there is no CAG visit with that uuid
+	 * @throws ParseException if dateStopped is not yyyy-MM-dd HH:mm:ss (other failures are no
+	 *             longer reported as a parse error)
+	 */
 	public CagVisit closeCagVisit(String uuid, String dateStopped) throws ParseException {
-		
-		try {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date stopDate = simpleDateFormat.parse(dateStopped);
-			
-			String dateTime = formatDateTime(stopDate);
-			CagVisit cagVisit = dao.closeCagVisit(uuid, dateTime);
-			CagVisit updatedCagVisit = getCagVisitByUuid(cagVisit.getUuid());
-			
-			Map<String, String> absentees = getAbsentees(updatedCagVisit);
-			Set<String> absenteeUuidSet = absentees.keySet();
-			Integer cagId = updatedCagVisit.getCag().getId();
-			Date visitStartDate = updatedCagVisit.getDateStarted();
-			
-			closePatientVisits(absenteeUuidSet, cagId, visitStartDate, dateTime);
-			
-			return updatedCagVisit;
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		simpleDateFormat.setLenient(false);
+		Date stopDate = simpleDateFormat.parse(dateStopped);
+
+		String dateTime = formatDateTime(stopDate);
+		CagVisit cagVisit = dao.closeCagVisit(uuid, dateTime);
+		if (cagVisit == null) {
+			return null;
 		}
-		catch (Exception e) {
-			throw new ParseException("Date ParseException encountered!", 1);
-		}
-		
+		CagVisit updatedCagVisit = getCagVisitByUuid(cagVisit.getUuid());
+
+		Map<String, String> absentees = getAbsentees(updatedCagVisit);
+		Set<String> absenteeUuidSet = absentees.keySet();
+		Integer cagId = updatedCagVisit.getCag().getId();
+		Date visitStartDate = updatedCagVisit.getDateStarted();
+
+		closePatientVisits(absenteeUuidSet, cagId, visitStartDate, dateTime);
+
+		return updatedCagVisit;
 	}
 	
 	public void closePatientVisits(Set<String> absenteeUuidSet, Integer cagId, Date visitDate, String dateStopped) {

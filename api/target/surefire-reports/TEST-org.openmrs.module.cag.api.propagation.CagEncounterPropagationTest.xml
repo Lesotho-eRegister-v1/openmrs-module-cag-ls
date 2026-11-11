@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="2.402" tests="7" errors="0" skipped="0" failures="0">
+<testsuite name="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="2.192" tests="8" errors="0" skipped="0" failures="0">
   <properties>
     <property name="jansi.mode" value="force"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
@@ -42,11 +42,10 @@
     <property name="file.encoding" value="UTF-8"/>
     <property name="user.name" value="kgatman"/>
     <property name="java.class.path" value="/usr/share/maven/boot/plexus-classworlds-2.x.jar"/>
-    <property name="org.slf4j.simpleLogger.defaultLogLevel" value="error"/>
     <property name="java.vm.specification.version" value="1.8"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="java.home" value="/usr/lib/jvm/java-8-openjdk-amd64/jre"/>
-    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher -q -o clean install"/>
+    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher clean install"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
     <property name="user.language" value="en"/>
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
@@ -63,11 +62,12 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase name="removedMember_shouldNotReceiveData" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="1.633"/>
-  <testcase name="attenderFollowUp_shouldBeMappedOntoEachPresentMembersCagVisit" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.13"/>
-  <testcase name="severalSavesInOneManualFlushSave_likeEmrapi_shouldMapOnce" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.126"/>
-  <testcase name="closedCagVisit_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.1"/>
-  <testcase name="otherEncounterTypes_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.078"/>
-  <testcase name="memberConsultation_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.071"/>
-  <testcase name="editingTheAttenderForm_shouldUpdateCopiesWithoutDuplicates" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.264"/>
+  <testcase name="removedMember_shouldNotReceiveData" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="1.319"/>
+  <testcase name="attenderFollowUp_shouldBeMappedOntoEachPresentMembersCagVisit" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.171"/>
+  <testcase name="severalSavesInOneManualFlushSave_likeEmrapi_shouldMapOnce" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.134"/>
+  <testcase name="closedCagVisit_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.103"/>
+  <testcase name="otherEncounterTypes_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.082"/>
+  <testcase name="formBuilder2026Form_shouldBeMappedOntoEachPresentMembersCagVisit" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.099"/>
+  <testcase name="memberConsultation_shouldNotPropagate" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.073"/>
+  <testcase name="editingTheAttenderForm_shouldUpdateCopiesWithoutDuplicates" classname="org.openmrs.module.cag.api.propagation.CagEncounterPropagationTest" time="0.211"/>
 </testsuite>

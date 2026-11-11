@@ -76,6 +76,11 @@
 		<description>Top-level obs (form) that is mapped (default: HIV Treatment and Care Progress Template).</description>
 	</globalProperty>
 	<globalProperty>
+		<property>cag.propagation.formNames</property>
+		<defaultValue>HIV Treatment and Care Follow Up 2026</defaultValue>
+		<description>Comma-separated Form Builder form names (any version) whose top-level obs are mapped like the template above.</description>
+	</globalProperty>
+	<globalProperty>
 		<property>cag.propagation.copiedConceptUuids</property>
 		<defaultValue>27d55083-5e66-4b5a-91d3-2c9a42cc9996,9eb00622-1078-4f7b-aa69-61e6c36db347,ed064424-0331-47f6-9532-77156f40a014,88489023-783b-4021-b7a9-05ca9877bf67</defaultValue>
 		<description>Comma-separated questions whose answers are copied from the attender as-is (default: ARV drugs No. of days dispensed, HIVTC ARV drugs supply duration, Appointment scheduled, ART Follow-up date).</description>

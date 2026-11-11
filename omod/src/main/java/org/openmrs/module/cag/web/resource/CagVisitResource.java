@@ -6,6 +6,7 @@ import org.openmrs.module.cag.cag.CagVisit;
 import org.openmrs.module.cag.web.controller.CagController;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
@@ -16,6 +17,8 @@ import org.openmrs.module.webservices.rest.web.resource.api.Searchable;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.stereotype.Component;
@@ -29,15 +32,28 @@ import java.util.List;
 @Component
 public class CagVisitResource extends DelegatingCrudResource<CagVisit> implements Searchable {
 	
+	/**
+	 * Closes the CAG visit. Returns the REST representation, not the entity: returning the
+	 * Hibernate entity made Jackson serialize its whole object graph and the request failed with a
+	 * 500 after the visit had already been closed.
+	 */
 	@Override
 	public Object update(String uuid, SimpleObject propertiesToUpdate, RequestContext context) throws ResponseException {
-		System.out.println("propertiesToUpdate.toString():\n" + propertiesToUpdate.get("dateStopped").toString() + "\n");
+		Object dateStopped = propertiesToUpdate.get("dateStopped");
+		if (dateStopped == null) {
+			throw new IllegalRequestException("dateStopped is required, as yyyy-MM-dd HH:mm:ss");
+		}
+		CagVisit closed;
 		try {
-			return getService().closeCagVisit(uuid, propertiesToUpdate.get("dateStopped").toString());
+			closed = getService().closeCagVisit(uuid, dateStopped.toString());
 		}
 		catch (ParseException e) {
-			throw new RuntimeException(e);
+			throw new IllegalRequestException("dateStopped must be yyyy-MM-dd HH:mm:ss, was: " + dateStopped);
 		}
+		if (closed == null) {
+			throw new ObjectNotFoundException();
+		}
+		return ConversionUtil.convertToRepresentation(closed, context.getRepresentation());
 	}
 	
 	@Override
@@ -53,18 +69,14 @@ public class CagVisitResource extends DelegatingCrudResource<CagVisit> implement
 		return new NeedsPaging<CagVisit>(getService().getCagAllVisits(), context);
 	}
 	
+	/** Returns null for an unknown uuid, which the REST framework turns into a 404. */
 	@Override
 	public CagVisit getByUniqueId(String uuid) {
-		System.out.println("Get CagVisit By Uuid been called !!!");
-		CagVisit cagVisit = getService().getCagVisitByUuid(uuid);
-		System.out.println("Our cagVisit is here : " + cagVisit);
-		
-		return cagVisit;
+		return getService().getCagVisitByUuid(uuid);
 	}
-	
+
 	@Override
 	protected void delete(CagVisit cagVisit, String s, RequestContext requestContext) throws ResponseException {
-		System.out.println("DELETE CagVisit has been called : uuid=" + cagVisit.getUuid());
 		getService().deleteCagVisit(cagVisit.getUuid());
 	}
 	
@@ -88,9 +100,7 @@ public class CagVisitResource extends DelegatingCrudResource<CagVisit> implement
 		
 		String attenderUuid = context.getParameter("attenderuuid");
 		Boolean isActive = Boolean.valueOf(context.getParameter("isactive"));
-		
-		System.out.println("uuid : " + attenderUuid + " , isactive :" + isActive);
-		
+
 		List<CagVisit> searchedCagVisits = getService().searchCagVisits(attenderUuid, isActive);
 		
 		return new NeedsPaging<CagVisit>(searchedCagVisits, context);
