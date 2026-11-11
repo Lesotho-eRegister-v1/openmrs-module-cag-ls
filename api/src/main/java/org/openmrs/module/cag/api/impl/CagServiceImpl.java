@@ -12,6 +12,7 @@ import org.openmrs.*;
 import org.openmrs.api.OrderContext;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.cag.api.CagQueueEntry;
 import org.openmrs.module.cag.api.CagService;
 import org.openmrs.module.cag.api.db.CagDao;
 import org.openmrs.module.cag.cag.*;
@@ -253,21 +254,21 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		simpleDateFormat.setLenient(false);
 		Date stopDate = simpleDateFormat.parse(dateStopped);
-
+		
 		String dateTime = formatDateTime(stopDate);
 		CagVisit cagVisit = dao.closeCagVisit(uuid, dateTime);
 		if (cagVisit == null) {
 			return null;
 		}
 		CagVisit updatedCagVisit = getCagVisitByUuid(cagVisit.getUuid());
-
+		
 		Map<String, String> absentees = getAbsentees(updatedCagVisit);
 		Set<String> absenteeUuidSet = absentees.keySet();
 		Integer cagId = updatedCagVisit.getCag().getId();
 		Date visitStartDate = updatedCagVisit.getDateStarted();
-
+		
 		closePatientVisits(absenteeUuidSet, cagId, visitStartDate, dateTime);
-
+		
 		return updatedCagVisit;
 	}
 	
@@ -404,6 +405,39 @@ public class CagServiceImpl extends BaseOpenmrsService implements CagService {
 	@Override
 	public void deleteCagEncounter(String uuid) {
 		dao.deleteCagEncounter(uuid);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<CagQueueEntry> getQueueEntries(Collection<String> visitUuids) {
+		List<CagQueueEntry> entries = new ArrayList<CagQueueEntry>();
+		if (visitUuids == null || visitUuids.isEmpty()) {
+			return entries;
+		}
+		Set<String> requested = new HashSet<String>(visitUuids);
+		for (CagVisit cagVisit : dao.getActiveCagVisitsContainingVisits(requested)) {
+			Patient presentMember = cagVisit.getAttender();
+			String presentMemberUuid = presentMember == null ? null : presentMember.getUuid();
+			String presentMemberName = presentMember == null ? null : displayName(presentMember);
+			for (Visit visit : cagVisit.getVisits()) {
+				if (!visit.getVoided() && requested.contains(visit.getUuid())) {
+					entries.add(new CagQueueEntry(visit.getUuid(), visit.getPatient().getUuid(),
+					        cagVisit.getCag().getUuid(), cagVisit.getCag().getName(), cagVisit.getUuid(), presentMemberUuid,
+					        presentMemberName));
+				}
+			}
+		}
+		return entries;
+	}
+	
+	/** Same "given family" form as the Clinical queue's name column. */
+	private static String displayName(Patient patient) {
+		String given = patient.getGivenName();
+		String family = patient.getFamilyName();
+		if (given == null) {
+			return family;
+		}
+		return family == null ? given : given + " " + family;
 	}
 	
 	@Override

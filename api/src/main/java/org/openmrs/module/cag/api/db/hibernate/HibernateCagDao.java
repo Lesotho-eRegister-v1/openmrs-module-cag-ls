@@ -276,4 +276,16 @@ public class HibernateCagDao implements CagDao {
 		query.setMaxResults(1);
 		return (CagEncounter) query.uniqueResult();
 	}
+	
+	@Override
+	public List<CagVisit> getActiveCagVisitsContainingVisits(Collection<String> visitUuids) {
+		if (visitUuids == null || visitUuids.isEmpty()) {
+			return new ArrayList<CagVisit>();
+		}
+		Query query = getSession().createQuery(
+		    "select distinct cv from cag_visit cv join cv.visits v where v.uuid in (:visitUuids)"
+		            + " and cv.voided = false and cv.isActive = true");
+		query.setParameterList("visitUuids", visitUuids);
+		return (List<CagVisit>) query.list();
+	}
 }

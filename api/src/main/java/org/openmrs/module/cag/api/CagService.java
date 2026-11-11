@@ -1,6 +1,7 @@
 package org.openmrs.module.cag.api;
 
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import org.openmrs.Patient;
@@ -57,5 +58,11 @@ public interface CagService extends OpenmrsService {
 	CagEncounter updateCagEncounter(String uuid, String locationUuid, Date nextEncounterDateTime);
 	
 	void deleteCagEncounter(String uuid);
+	
+	/**
+	 * For the Clinical patient queue: one entry per given visit that belongs to an active CAG
+	 * visit. Visits that are not part of an active CAG visit are left out.
+	 */
+	List<CagQueueEntry> getQueueEntries(Collection<String> visitUuids);
 	
 }

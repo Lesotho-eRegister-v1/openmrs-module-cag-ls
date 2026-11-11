@@ -1,3 +1,5 @@
 org/openmrs/module/cag/api/impl/CagServiceImplTest.class
 org/openmrs/module/cag/api/OpenCagVisitTest.class
+org/openmrs/module/cag/api/CagQueueEntriesTest.class
+org/openmrs/module/cag/api/CagUpdateAndCloseTest.class
 org/openmrs/module/cag/api/propagation/CagEncounterPropagationTest.class

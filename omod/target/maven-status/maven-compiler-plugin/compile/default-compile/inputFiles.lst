@@ -1,5 +1,6 @@
 /home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/extension/html/AdminList.java
 /home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/controller/CagController.java
+/home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/controller/CagQueueController.java
 /home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagEncounterResource.java
 /home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagPatientResource.java
 /home/kgatman/bahmniDev/openmrs-module-cag/omod/src/main/java/org/openmrs/module/cag/web/resource/CagResource.java

@@ -2,6 +2,7 @@
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/CagConfig.java
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/CagConstants.java
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/advice/CagEncounterSaveAdvice.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/api/CagQueueEntry.java
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/api/CagService.java
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/api/db/CagDao.java
 /home/kgatman/bahmniDev/openmrs-module-cag/api/src/main/java/org/openmrs/module/cag/api/db/hibernate/HibernateCagDao.java

@@ -45,7 +45,7 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 		}
 		List<Patient> cagPatientList = getService().getCagAllPatients(cag.getId());
 		cag.setCagPatientList(cagPatientList);
-
+		
 		return cag;
 	}
 	
@@ -84,7 +84,7 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 		if (existing == null) {
 			throw new ObjectNotFoundException();
 		}
-
+		
 		Cag updatingCag = new Cag();
 		updatingCag.setUuid(uuid);
 		updatingCag.setName(value(propertiesToUpdate, "name", existing.getName()));
@@ -92,11 +92,11 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 		updatingCag.setConstituency(value(propertiesToUpdate, "constituency", existing.getConstituency()));
 		updatingCag.setVillage(value(propertiesToUpdate, "village", existing.getVillage()));
 		updatingCag.setDistrict(value(propertiesToUpdate, "district", existing.getDistrict()));
-
+		
 		Cag updated = getService().updateCag(updatingCag);
 		return ConversionUtil.convertToRepresentation(updated, context.getRepresentation());
 	}
-
+	
 	private static String value(SimpleObject properties, String name, String current) {
 		if (!properties.containsKey(name)) {
 			return current;
@@ -182,7 +182,7 @@ public class CagResource extends DelegatingCrudResource<Cag> implements Updatabl
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
 		String patientUuid = context.getParameter("patientuuid");
-
+		
 		Cag searchedCag = getService().searchCagByMemberUuid(patientUuid);
 		// a patient in no CAG gives an empty result, not a list holding null (500 on conversion)
 		List<Cag> results = searchedCag == null ? new ArrayList<Cag>() : new ArrayList<Cag>(

@@ -74,7 +74,7 @@ public class CagVisitResource extends DelegatingCrudResource<CagVisit> implement
 	public CagVisit getByUniqueId(String uuid) {
 		return getService().getCagVisitByUuid(uuid);
 	}
-
+	
 	@Override
 	protected void delete(CagVisit cagVisit, String s, RequestContext requestContext) throws ResponseException {
 		getService().deleteCagVisit(cagVisit.getUuid());
@@ -100,7 +100,7 @@ public class CagVisitResource extends DelegatingCrudResource<CagVisit> implement
 		
 		String attenderUuid = context.getParameter("attenderuuid");
 		Boolean isActive = Boolean.valueOf(context.getParameter("isactive"));
-
+		
 		List<CagVisit> searchedCagVisits = getService().searchCagVisits(attenderUuid, isActive);
 		
 		return new NeedsPaging<CagVisit>(searchedCagVisits, context);

@@ -7,6 +7,7 @@ import org.openmrs.Visit;
 import org.openmrs.module.cag.cag.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -74,4 +75,9 @@ public interface CagDao {
 	
 	/** The non-voided CAG encounter that links {@code encounter}, or null. */
 	CagEncounter getCagEncounterContaining(Encounter encounter);
+	
+	/**
+	 * @return the active, non-voided CAG visits that contain at least one of these visits
+	 */
+	List<CagVisit> getActiveCagVisitsContainingVisits(Collection<String> visitUuids);
 }
