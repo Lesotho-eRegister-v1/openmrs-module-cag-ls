@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>cag</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Community ART Groups Module</name>
 	<description>Manages patients' Community ART Groups data</description>
@@ -53,16 +53,7 @@
 	</pluginRepositories>
 
     <properties>
-        <openmrsPlatformVersion>1.11.6</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.5.14</openmrsPlatformVersion>
     </properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>emrapi-api-1.12</artifactId>
-			<version>1.24.5</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
 
 </project>

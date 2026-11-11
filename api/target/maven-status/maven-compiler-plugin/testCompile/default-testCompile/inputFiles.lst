@@ -1,5 +1,7 @@
-/Users/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/CagServiceTest.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/db/hibernate/HibernateCagDaoTest.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/impl/CagServiceImplTest.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/cag/CagPatientTest.java
-/Users/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/cag/CagTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/CagServiceTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/OpenCagVisitTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/db/hibernate/HibernateCagDaoTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/impl/CagServiceImplTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/api/propagation/CagEncounterPropagationTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/cag/CagPatientTest.java
+/home/kgatman/bahmniDev/openmrs-module-cag/api/src/test/java/org/openmrs/module/cag/cag/CagTest.java
