@@ -54,21 +54,27 @@ public class HibernateCagDao implements CagDao {
 	}
 	
 	@Override
+	/**
+	 * Copies the editable fields onto the stored CAG. Updates the managed entity instead of running
+	 * a bulk HQL update, which bypassed the session: the CAG returned afterwards could still hold
+	 * the old values, and date_changed lost its time of day.
+	 *
+	 * @return the updated CAG, or null if there is no non-voided CAG with that uuid
+	 */
 	public Cag updateCag(Cag cag) {
-		Query query = getSession().createQuery(
-		    "update cag c set c.name=:name, c.description=:description, c.village=:village,"
-		            + " c.constituency=:constituency, c.district=:district, c.dateChanged=:date_changed,"
-		            + " c.changedBy=:changed_by where c.uuid=:uuid and c.voided=false");
-		query.setString("name", cag.getName());
-		query.setString("description", cag.getDescription());
-		query.setString("village", cag.getVillage());
-		query.setString("constituency", cag.getConstituency());
-		query.setString("district", cag.getDistrict());
-		query.setDate("date_changed", cag.getDateChanged());
-		query.setParameter("changed_by", cag.getChangedBy());
-		query.setString("uuid", cag.getUuid());
-		query.executeUpdate();
-		return getCagByUuid(cag.getUuid());
+		Cag stored = getCagByUuid(cag.getUuid());
+		if (stored == null) {
+			return null;
+		}
+		stored.setName(cag.getName());
+		stored.setDescription(cag.getDescription());
+		stored.setVillage(cag.getVillage());
+		stored.setConstituency(cag.getConstituency());
+		stored.setDistrict(cag.getDistrict());
+		stored.setDateChanged(cag.getDateChanged());
+		stored.setChangedBy(cag.getChangedBy());
+		getSession().update(stored);
+		return stored;
 	}
 	
 	@Override
